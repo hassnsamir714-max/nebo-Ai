@@ -1,0 +1,58 @@
+
+import json
+import re
+from collections import Counter
+
+class NeboTokenizer:
+    def __init__(self, vocab_size=8000):
+        self.vocab_size = vocab_size
+        self.token_to_id = {
+            "<PAD>": 0,
+            "<UNK>": 1,
+            "<BOS>": 2,
+            "<EOS>": 3
+        }
+        self.id_to_token = {
+            value: key for key, value in self.token_to_id.items()
+        }
+
+    def tokenize(self, text):
+        return re.findall(r"\w+|[^\w\s]", text.lower())
+
+    def train(self, texts):
+        counter = Counter()
+
+        for text in texts:
+            counter.update(self.tokenize(text))
+
+        for token, _ in counter.most_common(self.vocab_size - 4):
+            if token not in self.token_to_id:
+                idx = len(self.token_to_id)
+                self.token_to_id[token] = idx
+                self.id_to_token[idx] = token
+
+    def encode(self, text):
+        tokens = self.tokenize(text)
+        return [
+            self.token_to_id.get(token, 1)
+            for token in tokens
+        ]
+
+    def decode(self, ids):
+        return " ".join(
+            self.id_to_token.get(int(idx), "<UNK>")
+            for idx in ids
+        )
+
+    def save(self, path):
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(self.token_to_id, f, ensure_ascii=False)
+
+    def load(self, path):
+        with open(path, "r", encoding="utf-8") as f:
+            self.token_to_id = json.load(f)
+
+        self.id_to_token = {
+            int(value): key
+            for key, value in self.token_to_id.items()
+        }
