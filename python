@@ -1,0 +1,3 @@
+python -m pip install -r requirements-dev.txt
+python train.py --steps 1000
+streamlit run app.py
