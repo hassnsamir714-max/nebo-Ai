@@ -1,0 +1,4 @@
+__pycache__/
+.venv/
+nebo_model.pt
+*.py[cod]
